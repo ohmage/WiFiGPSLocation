@@ -1172,7 +1172,6 @@ public class WiFiGPSLocationService
 
     };
 
-    private LogProbe logger;
 
 
 	
@@ -1199,11 +1198,8 @@ public class WiFiGPSLocationService
         }
 
 
-        if (logger == null) {
-            logger = new LogProbe(true, Loglevel.VERBOSE);
-            logger.connect(this);
-        }
-
+        LogProbe.setLevel(true, Loglevel.VERBOSE);
+        LogProbe.get(this);
 
 
         if (intent != null)
@@ -1260,10 +1256,8 @@ public class WiFiGPSLocationService
     {
         super.onCreate();
 
-        if (logger == null) {
-            logger = new LogProbe(true, Loglevel.VERBOSE);
-            logger.connect(this);
-        }
+        LogProbe.setLevel(true, Loglevel.VERBOSE);
+        LogProbe.get(this);
 
         bindService(new Intent(IPowerMonitor.class.getName()),
                 mPowerMonitorConnection, Context.BIND_AUTO_CREATE);
@@ -1410,10 +1404,7 @@ public class WiFiGPSLocationService
 		
 		// Cancel WiFi scan registration
 		unregisterReceiver(mWifiScanReceiver);
-        if (logger != null) {
-            logger.close();
-            logger = null;
-        }
+        LogProbe.close(this);
     }
 
     private boolean readDb()
