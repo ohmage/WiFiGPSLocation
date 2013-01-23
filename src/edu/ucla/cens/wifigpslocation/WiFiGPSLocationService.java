@@ -5,61 +5,56 @@
   */
 package edu.ucla.cens.wifigpslocation;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Calendar;
-//import java.util.TimeZone;
-import java.util.Locale;
-import java.util.Collections;
-import java.text.SimpleDateFormat;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ConcurrentModificationException;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import org.joda.time.DateTimeZone;
-
-
-import android.content.BroadcastReceiver;
-import android.app.Service;
-import android.app.PendingIntent;
 import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.RemoteCallbackList;
-import android.os.PowerManager;
-import android.widget.Toast;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.database.Cursor;
-import android.database.SQLException;
 
-
-import edu.ucla.cens.systemsens.IPowerMonitor;
 import edu.ucla.cens.systemsens.IAdaptiveApplication;
+import edu.ucla.cens.systemsens.IPowerMonitor;
 
-import edu.ucla.cens.systemlog.ISystemLog;
-import edu.ucla.cens.systemlog.Log;
-import edu.ucla.cens.accelservice.IAccelService;
+import org.joda.time.DateTimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.ohmage.logprobe.Log;
+import org.ohmage.logprobe.LogProbe;
+import org.ohmage.logprobe.LogProbe.Loglevel;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+//import java.util.TimeZone;
 
 
 /**
@@ -1177,6 +1172,8 @@ public class WiFiGPSLocationService
 
     };
 
+    private LogProbe logger;
+
 
 	
     @Override
@@ -1202,10 +1199,9 @@ public class WiFiGPSLocationService
         }
 
 
-        if (!Log.isConnected())
-        {
-            bindService(new Intent(ISystemLog.class.getName()),
-                    Log.SystemLogConnection, Context.BIND_AUTO_CREATE);
+        if (logger == null) {
+            logger = new LogProbe(true, Loglevel.VERBOSE);
+            logger.connect(this);
         }
 
 
@@ -1264,8 +1260,10 @@ public class WiFiGPSLocationService
     {
         super.onCreate();
 
-        bindService(new Intent(ISystemLog.class.getName()),
-                Log.SystemLogConnection, Context.BIND_AUTO_CREATE);
+        if (logger == null) {
+            logger = new LogProbe(true, Loglevel.VERBOSE);
+            logger.connect(this);
+        }
 
         bindService(new Intent(IPowerMonitor.class.getName()),
                 mPowerMonitorConnection, Context.BIND_AUTO_CREATE);
@@ -1281,10 +1279,6 @@ public class WiFiGPSLocationService
 
 
         mClientsTable = new Hashtable<String, Integer>();
-
-
-        Log.setAppName(APP_NAME);
-
 
         mCallbacks = new RemoteCallbackList<ILocationChangedCallback>();
 
@@ -1416,7 +1410,10 @@ public class WiFiGPSLocationService
 		
 		// Cancel WiFi scan registration
 		unregisterReceiver(mWifiScanReceiver);
-        unbindService(Log.SystemLogConnection);
+        if (logger != null) {
+            logger.close();
+            logger = null;
+        }
     }
 
     private boolean readDb()

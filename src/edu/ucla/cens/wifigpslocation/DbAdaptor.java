@@ -12,12 +12,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.location.Location;
+
+import org.ohmage.logprobe.Log;
 
 import java.util.HashMap;
-
-import edu.ucla.cens.systemlog.ISystemLog;
-import edu.ucla.cens.systemlog.Log;
 
 /**
  * Simple  database access helper class. 
