@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2010 Hossein Falaki
  */
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 
 import android.content.ContentValues;

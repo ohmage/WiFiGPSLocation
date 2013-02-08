@@ -1,4 +1,4 @@
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 
 oneway interface ILocationChangedCallback {

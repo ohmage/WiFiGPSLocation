@@ -1,4 +1,4 @@
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 import android.location.Location;
 import android.os.SystemClock;

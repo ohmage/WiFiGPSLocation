@@ -3,7 +3,7 @@
   *
   * Copyright (C) 2010 Center for Embedded Networked Sensing
   */
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

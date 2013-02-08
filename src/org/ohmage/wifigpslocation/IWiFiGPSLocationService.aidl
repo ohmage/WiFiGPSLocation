@@ -1,8 +1,8 @@
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 import android.location.Location;
 
-import edu.ucla.cens.wifigpslocation.ILocationChangedCallback;
+import org.ohmage.wifigpslocation.ILocationChangedCallback;
 
 interface IWiFiGPSLocationService {
 

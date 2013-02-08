@@ -1,4 +1,4 @@
-package edu.ucla.cens.wifigpslocation;
+package org.ohmage.wifigpslocation;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
