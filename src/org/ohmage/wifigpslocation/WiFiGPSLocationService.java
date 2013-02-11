@@ -175,7 +175,7 @@ public class WiFiGPSLocationService
     private RemoteCallbackList<ILocationChangedCallback> mCallbacks;
 
     /** Counter for the callbacks */
-    private int mCallbackCount = 0;
+    private final int mCallbackCount = 0;
 
     /** AccelService object */
     /*
@@ -267,11 +267,13 @@ public class WiFiGPSLocationService
     private final IAdaptiveApplication mAdaptiveControl
         = new IAdaptiveApplication.Stub()
     {
+        @Override
         public String getName()
         {
             return APP_NAME;
         }
 
+        @Override
         public List<String> identifyList()
         {
             ArrayList<String> unitNames = new ArrayList(2);
@@ -282,6 +284,7 @@ public class WiFiGPSLocationService
             return unitNames;
         }
 
+        @Override
         public List<Double> getWork()
         {
             ArrayList<Double> totalWork = new ArrayList<Double>();
@@ -289,19 +292,20 @@ public class WiFiGPSLocationService
             double workDone = mGPSManager.getMinutes();
             mGPSHistory.add(workDone);
             totalWork.add(workDone);
-            Log.i(TAG, "Added " + workDone + " to GPS history queue: " 
+            Log.v(TAG, "Added " + workDone + " to GPS history queue: " 
                     + mGPSHistory.getSum());
 
             workDone = mScanManager.getWork();
             mScanHistory.add(workDone);
             totalWork.add(workDone);
-            Log.i(TAG, "Added " + workDone + " to Scan history queue: " 
+            Log.v(TAG, "Added " + workDone + " to Scan history queue: " 
                     + mScanHistory.getSum());
 
 
             return totalWork;
         }
 
+        @Override
         public void setWorkLimit(List  workLimit)
         {
             double gpsLimit = (Double) workLimit.get(0);
@@ -336,6 +340,7 @@ public class WiFiGPSLocationService
          *
          * @return      state of the service
          */
+        @Override
         public boolean isRunning()
         {
             return mRun;
@@ -348,23 +353,24 @@ public class WiFiGPSLocationService
          *
          * @return		the last known location
          */
+        @Override
         public synchronized Location getLocation()
         {
             if (!mRun)
             {
-                Log.i(TAG, "Reporting null to client.");
+                Log.v(TAG, "Reporting null to client.");
                 return null;
             }
 
             if (mLastKnownLoc != null)
             {
-                Log.i(TAG, "Reporting " + mLastKnownLoc.getProvider() 
+                Log.v(TAG, "Reporting " + mLastKnownLoc.getProvider() 
                         + " to client.");
                 return mLastKnownLoc;
             }
             else
             {
-                Log.i(TAG, "Reporting " + mFakeLocation.getProvider() 
+                Log.v(TAG, "Reporting " + mFakeLocation.getProvider() 
                         + " to client.");
                 return mFakeLocation;
             }
@@ -379,6 +385,7 @@ public class WiFiGPSLocationService
          *
          * @return              JSON object containing visible WiFi APs
          */
+        @Override
         public String getWiFiScan()
         {
             JSONObject scanJson, scanResult = new JSONObject();
@@ -428,6 +435,7 @@ public class WiFiGPSLocationService
          * @param		interval	GPS sampling interval in milliseconds
          * @param       callerName  String name identifying the client
          */
+        @Override
         public int suggestInterval(String callerName, int interval)
         {
             if (callerName == null)
@@ -457,6 +465,7 @@ public class WiFiGPSLocationService
          * @param       callerName  String name identifying the client
          * @param       callback    callback object
          */
+        @Override
         public void registerCallback(String callerName, 
                 ILocationChangedCallback callback)
         {
@@ -477,6 +486,7 @@ public class WiFiGPSLocationService
          * @param       callerName  String name identifying the client
          * @param       callback    callback object
          */
+        @Override
         public void unregisterCallback(String callerName,
                 ILocationChangedCallback callback)
         {
@@ -498,6 +508,7 @@ public class WiFiGPSLocationService
          * 
          * @param       callerName  String name identifying the client
          */
+        @Override
         public void stop(String callerName)
         {
             if (callerName == null)
@@ -508,13 +519,13 @@ public class WiFiGPSLocationService
             else
                 return;
 
-            Log.i(TAG, "Received a stop() call from " + callerName);
+            Log.v(TAG, "Received a stop() call from " + callerName);
 
             int clientCount = mClientsTable.size();
 
             if ((clientCount == 0) && (mRun))
             {
-                Log.i(TAG, "Stoping operations");
+                Log.v(TAG, "Stoping operations");
                 // Cancel pending alarms
                 mAlarmManager.cancel(mScanSender);
                 mAlarmManager.cancel(mCleanupSender);
@@ -528,7 +539,7 @@ public class WiFiGPSLocationService
             }
             else
             {
-                Log.i(TAG, "Continuing operations");
+                Log.v(TAG, "Continuing operations");
                 adjustGPSInterval();
 
             }
@@ -541,12 +552,13 @@ public class WiFiGPSLocationService
          *
          * @param       callerName  String name identifying the client
          */
+        @Override
         public void start(String callerName)
         {			
             if (callerName == null)
                 return;
 
-            Log.i(TAG, "Received a start() call from " + callerName);
+            Log.v(TAG, "Received a start() call from " + callerName);
 
             if (!mClientsTable.containsKey(callerName))
                 mClientsTable.put(callerName, 
@@ -597,7 +609,7 @@ public class WiFiGPSLocationService
      * registerReceiver. 
      *
      */
-    private BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() 
+    private final BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() 
     {
         @Override
         public void onReceive(Context context, Intent intent) 
@@ -636,7 +648,7 @@ public class WiFiGPSLocationService
                 {
                     mZeroWifi = false;
                     double newThreshold = levelSum/mScanResults.size();
-                    Log.i(TAG, " Using " + newThreshold
+                    Log.v(TAG, " Using " + newThreshold
                             + " as signal strength threshold.");
                     
                     for (ScanResult result : mScanResults)
@@ -646,12 +658,12 @@ public class WiFiGPSLocationService
                 }
                 else
                 {
-                    Log.i(TAG, "No visible WiFi AP");
+                    Log.v(TAG, "No visible WiFi AP");
                     mZeroWifi = true;
 
                 }
 
-                Log.i(TAG, "Filtered " 
+                Log.v(TAG, "Filtered " 
                     + (mScanResults.size() - sResult.size()) 
                     + " APs.");
 
@@ -663,8 +675,7 @@ public class WiFiGPSLocationService
             else if (action.equals( 
                         WifiManager.WIFI_STATE_CHANGED_ACTION)) 
             {
-                int wifiState = (int) 
-                intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
+                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
                 if (wifiState == WifiManager.WIFI_STATE_DISABLED)
                 {
                     Log.v(TAG, "User disabeled Wifi." +
@@ -681,14 +692,15 @@ public class WiFiGPSLocationService
     };
 
 
-    private LocationListener mNetLocListener = new LocationListener()
+    private final LocationListener mNetLocListener = new LocationListener()
     {
+        @Override
         public synchronized void onLocationChanged(Location location)
         {
 
            if (mWaitingForNetLocation)
             {
-                Log.i(TAG, "Got a network loc update while waiting" 
+                Log.v(TAG, "Got a network loc update while waiting" 
                         + " for it.");
                 mLastKnownLoc = location;
                 mLastKnownLoc.setProvider(NET_PROVIDER);
@@ -696,30 +708,33 @@ public class WiFiGPSLocationService
             }
             else
             {
-                Log.i(TAG, "Did not expect a network loc update!");
+                Log.v(TAG, "Did not expect a network loc update!");
             }
 
             mLocManager.removeUpdates(mNetLocListener);
 
         }
 
+        @Override
         public void onProviderDisabled(String provider)
         {
-            Log.i(TAG, provider + " was disabled.");
+            Log.v(TAG, provider + " was disabled.");
             USE_NETWORK_LOCATION = false;
         }
 
+        @Override
         public void onProviderEnabled(String provider)
         {
-            Log.i(TAG, provider + " was enabled.");
+            Log.v(TAG, provider + " was enabled.");
             USE_NETWORK_LOCATION = true;
         }
 
+        @Override
         public void onStatusChanged(String provider, int status,
                 Bundle extra)
         {
 
-            Log.i(TAG, provider + "status changed to " + status);
+            Log.v(TAG, provider + "status changed to " + status);
 
         }
 
@@ -727,10 +742,11 @@ public class WiFiGPSLocationService
     };
 
 
+    @Override
     public synchronized void onLocationChanged(Location location) 
     {
         double accuracy =  location.getAccuracy();
-        Log.i(TAG, "Received location update. Accuracy: " + accuracy);
+        Log.v(TAG, "Received location update. Accuracy: " + accuracy);
 
         String provider = location.getProvider();
 
@@ -743,7 +759,7 @@ public class WiFiGPSLocationService
             {
                 if (!mScanCache.get(mLastWifiSet).known)
                 {
-                    Log.i(TAG, "Updating the record: " + 
+                    Log.v(TAG, "Updating the record: " + 
                     cacheEntry(mLastWifiSet));
                     mScanCache.get(mLastWifiSet).known = true;
                     mScanCache.get(mLastWifiSet).loc = location;
@@ -773,7 +789,6 @@ public class WiFiGPSLocationService
         }
         else
         {
-            //Log.v(TAG, "Not accurate enough.");
             mTempKnownLoc = location;
             mTempKnownLoc.setProvider(WIFIGPS_PROVIDER);
             mHandler.removeMessages(LOC_UPDATE_MSG);
@@ -784,22 +799,25 @@ public class WiFiGPSLocationService
         }
     }
 	
+    @Override
     public void onStatusChanged(String provider, 
             int status, Bundle extras) 
     {
-        Log.i(TAG, provider + "status changed to " + status);
+        Log.v(TAG, provider + "status changed to " + status);
 
     }
         
+    @Override
     public void onProviderEnabled(String provider) 
     {
-        Log.i(TAG, provider + " was enabled.");
+        Log.v(TAG, provider + " was enabled.");
 
     }
 
+    @Override
     public void onProviderDisabled(String provider) 
     {
-        Log.i(TAG, provider + " was disabled.");
+        Log.v(TAG, provider + " was disabled.");
 
     }
     
@@ -854,8 +872,7 @@ public class WiFiGPSLocationService
                     }
                     catch (RemoteException re)
                     {
-                        Log.e(TAG, "Exception when calling AccelService", 
-                                re);
+                        Log.e(TAG, "Exception when calling AccelService", re);
                     }
                 }
 
@@ -869,7 +886,7 @@ public class WiFiGPSLocationService
             {
                 if (!mScanCache.get(mLastWifiSet).known)
                 {
-                    Log.i(TAG, "Concluded no lock for last WiFi set");
+                    Log.v(TAG, "Concluded no lock for last WiFi set");
                     mScanCache.get(mLastWifiSet).known = true;
                 }
             }
@@ -880,7 +897,7 @@ public class WiFiGPSLocationService
             // situations. So turn on GPS and return
             if (wifiSet.size() == 0)
             {
-                Log.i(TAG, "No WiFi AP found.");
+                Log.v(TAG, "No WiFi AP found.");
                 mGPSManager.start();
                 return;
             }
@@ -895,12 +912,12 @@ public class WiFiGPSLocationService
                 record = mScanCache.get(key);
                 record.increment();
                 record.resetTime(curTime);
-                Log.i(TAG, "Found a record: " 
+                Log.v(TAG, "Found a record: " 
                         + record.toString());
 
                 if (record.count <= SIGNIFICANCE_THRESHOLD)
                 {
-                    Log.i(TAG, "Not significant yet. "
+                    Log.v(TAG, "Not significant yet. "
                            + "Still need to run GPS.");
 
                     mGPSManager.start();
@@ -909,7 +926,7 @@ public class WiFiGPSLocationService
                 else if (record.count > SIGNIFICANCE_THRESHOLD)
                 {
 
-                    Log.i(TAG, "Significant record.");
+                    Log.v(TAG, "Significant record.");
 
                     // update the time stamp of the 
                     // last known GPS location
@@ -928,7 +945,7 @@ public class WiFiGPSLocationService
                     { 
                         if (USE_NETWORK_LOCATION)
                         {
-                            Log.i(TAG, "Getting network location");
+                            Log.v(TAG, "Getting network location");
                             try
                             {
                                 mLocManager.requestLocationUpdates(
@@ -951,13 +968,13 @@ public class WiFiGPSLocationService
                                 !mLastKnownLoc.getProvider().equals(
                                     FAKE_PROVIDER))
                         {
-                            Log.i(TAG, "Using approx location.");
+                            Log.v(TAG, "Using approx location.");
                             mLastKnownLoc.setProvider(APPROX_PROVIDER);
                             mLastKnownLoc.setSpeed(0);
                         }
                         else
                         {
-                            Log.i(TAG, "Using fake location.");
+                            Log.v(TAG, "Using fake location.");
                             mLastKnownLoc = mFakeLocation;
                         }
                     }
@@ -974,12 +991,12 @@ public class WiFiGPSLocationService
             }
             else // The cache does not contain the wifi signature
             {
-                Log.i(TAG, "New WiFi set.");
+                Log.v(TAG, "New WiFi set.");
 
                 // Schedule a GPS scan
                 record = new GPSInfo(false, curTime);
                 mScanCache.put(key, record);
-                Log.i(TAG, "Created new cache entry: " 
+                Log.v(TAG, "Created new cache entry: " 
                         + record.toString());
 
                 mGPSManager.start();
@@ -1000,7 +1017,7 @@ public class WiFiGPSLocationService
         {
             if (msg.what == LOC_UPDATE_MSG)
             {
-                Log.i(TAG, "Dealing with inaccurate location. "
+                Log.v(TAG, "Dealing with inaccurate location. "
                         + "Accuracy: " 
                         + mTempKnownLoc.getAccuracy());
 
@@ -1010,7 +1027,7 @@ public class WiFiGPSLocationService
                 {
                     if (!mScanCache.get(mLastWifiSet).known)
                     {
-                        Log.i(TAG, "Updating the record: " + 
+                        Log.v(TAG, "Updating the record: " + 
                                 cacheEntry(mLastWifiSet));
                         mScanCache.get(mLastWifiSet).known = true;
                         mScanCache.get(mLastWifiSet).loc =
@@ -1043,8 +1060,8 @@ public class WiFiGPSLocationService
     	
     	HashSet<String> toBeDeleted = new HashSet<String>();
     	
-    	Log.i(TAG, "Cleaning up the cache.");
-    	Log.i(TAG, "Current cache has " + mScanCache.size() + " entries.");
+    	Log.v(TAG, "Cleaning up the cache.");
+    	Log.v(TAG, "Current cache has " + mScanCache.size() + " entries.");
     	
     	
     	for (String key: mScanCache.keySet())
@@ -1059,7 +1076,7 @@ public class WiFiGPSLocationService
     		{
     			if (curTime - cacheTime > ONE_HOUR)
     			{
-    				Log.i(TAG, "Marking transient record for deletion: " 
+    				Log.v(TAG, "Marking transient record for deletion: " 
                             + record.toString());
     				toBeDeleted.add(key);
     			}
@@ -1067,7 +1084,7 @@ public class WiFiGPSLocationService
     		else if ((count < CRITICAL_THRESHOLD) 
                     &&(timeout > CACHE_TIMEOUT ))
 			{
-				Log.i(TAG, "Marking stale record for deletion: " + 
+				Log.v(TAG, "Marking stale record for deletion: " + 
                         record.toString());
 				// The cache entry has timed out. Remove it!
 				toBeDeleted.add(key);
@@ -1078,7 +1095,7 @@ public class WiFiGPSLocationService
     	{
 	    	for (String delKey : toBeDeleted)
 	    	{
-	    		Log.i(TAG, "Deleting " + cacheEntry(delKey));
+	    		Log.v(TAG, "Deleting " + cacheEntry(delKey));
 	    		removed = mScanCache.remove(delKey);
 	    	}
     	}
@@ -1128,10 +1145,11 @@ public class WiFiGPSLocationService
     */
     
 
-    private ServiceConnection mPowerMonitorConnection 
+    private final ServiceConnection mPowerMonitorConnection 
             = new ServiceConnection() 
     {
 
+        @Override
         public void onServiceConnected(ComponentName className,
                 IBinder service)
         {
@@ -1150,6 +1168,7 @@ public class WiFiGPSLocationService
             mPowerMonitorConnected = true;
         }
 
+        @Override
         public void onServiceDisconnected(ComponentName className)
         {
 
@@ -1192,7 +1211,7 @@ public class WiFiGPSLocationService
     {
         if (!mPowerMonitorConnected)
         {
-            Log.i(TAG, "Rebinding to PowerMonitor");
+            Log.v(TAG, "Rebinding to PowerMonitor");
             bindService(new Intent(IPowerMonitor.class.getName()),
                     mPowerMonitorConnection, Context.BIND_AUTO_CREATE);
         }
@@ -1209,7 +1228,7 @@ public class WiFiGPSLocationService
             if (action != null)
             {
 
-                Log.i(TAG, "Received action: " + action);
+                Log.v(TAG, "Received action: " + action);
                 if (action.equals(WIFISCAN_ALARM_ACTION))
                 {
                     if (!mCpuLock.isHeld())
@@ -1276,10 +1295,6 @@ public class WiFiGPSLocationService
 
         mCallbacks = new RemoteCallbackList<ILocationChangedCallback>();
 
-        
-     
-        Log.i(TAG, "onCreate");
-
         mDbAdaptor = new DbAdaptor(this);
 
         mGPSManager = new GPSManager();
@@ -1290,7 +1305,7 @@ public class WiFiGPSLocationService
 		mScanCache = new HashMap<String, GPSInfo>();
 
 
-        Log.i(TAG, "Reading last saved cache");
+        Log.v(TAG, "Reading last saved cache");
         readDb();
 
 
@@ -1443,7 +1458,7 @@ public class WiFiGPSLocationService
 
         int dbSize = c.getCount();
 
-        Log.i(TAG, "Found " + dbSize + " entries in database.");
+        Log.v(TAG, "Found " + dbSize + " entries in database.");
 
         c.moveToFirst();
 
@@ -1480,12 +1495,12 @@ public class WiFiGPSLocationService
                 }
                 else
                 {
-                    Log.i(TAG, "Entry with no location.");
+                    Log.v(TAG, "Entry with no location.");
                 }
 
                 gpsInfo.count = count;
                 mScanCache.put(sign, gpsInfo);
-                Log.i(TAG, "Synced " + gpsInfo.toString());
+                Log.v(TAG, "Synced " + gpsInfo.toString());
 
             }
             catch (Exception dbe)
@@ -1561,7 +1576,7 @@ public class WiFiGPSLocationService
          else
             mGpsScanInterval = DEFAULT_GPS_SCANNING_INTERVAL;
 
-         Log.i(TAG, "Scanning interval adjusted to " +
+         Log.v(TAG, "Scanning interval adjusted to " +
                  mGpsScanInterval);
 
          return mGpsScanInterval;
@@ -1731,14 +1746,14 @@ public class WiFiGPSLocationService
             mLimit = workLimit * ONE_MINUTE;
             mCurTotal = 0.0;
             double used = mGPSHistory.getSum();
-            Log.i(TAG, "Estimated usage per horizon: " + used);
-            Log.i(TAG, "Current limit per horizon: " + workLimit);
+            Log.v(TAG, "Estimated usage per horizon: " + used);
+            Log.v(TAG, "Current limit per horizon: " + workLimit);
         }
 
 
         public boolean start()
         {
-            Log.i(TAG, "curTotal:" + mCurTotal 
+            Log.v(TAG, "curTotal:" + mCurTotal 
                     + ", mLimit: " + mLimit);
 
             if (!mGPSRunning)
@@ -1746,7 +1761,7 @@ public class WiFiGPSLocationService
                 if ( Double.isNaN(mLimit) || (mCurTotal < mLimit) )
                 {
                     mStart = SystemClock.elapsedRealtime();
-                    Log.i(TAG, "Starting GPS.");
+                    Log.v(TAG, "Starting GPS.");
                     mLocManager.requestLocationUpdates( 
                             LocationManager.GPS_PROVIDER, 
                             mGpsScanInterval, 0,
@@ -1756,7 +1771,7 @@ public class WiFiGPSLocationService
                 }
                 else 
                 {
-                    Log.i(TAG, "No budget to start GPS.");
+                    Log.v(TAG, "No budget to start GPS.");
                     mGPSRunning = false;
                     return mGPSRunning;
                 }
@@ -1772,15 +1787,15 @@ public class WiFiGPSLocationService
                 if ( !Double.isNaN(mLimit) && (mCurTotal > mLimit) )
                 {
 
-                    Log.i(TAG, "Ran out of GPS budget.");
+                    Log.v(TAG, "Ran out of GPS budget.");
                     mLocManager.removeUpdates(WiFiGPSLocationService.this);
-                    Log.i(TAG, "Stopping GPS.");
+                    Log.v(TAG, "Stopping GPS.");
                     mGPSRunning = false;
                     return mGPSRunning;
                 }
                 else
                 {
-                    Log.i(TAG, "Continue scanning GPS.");
+                    Log.v(TAG, "Continue scanning GPS.");
                     mGPSRunning = true;
                     return mGPSRunning;
                 }
@@ -1794,14 +1809,14 @@ public class WiFiGPSLocationService
             if (mGPSRunning)
             {
                 mLocManager.removeUpdates(WiFiGPSLocationService.this);
-                Log.i(TAG, "Stopping GPS.");
+                Log.v(TAG, "Stopping GPS.");
 
                 double current =  SystemClock.elapsedRealtime();
                 mTotal += (current - mStart);
                 mCurTotal += (current - mStart);
                 mGPSRunning = false;
 
-                Log.i(TAG, "Updated mCurTotal to " + mCurTotal);
+                Log.v(TAG, "Updated mCurTotal to " + mCurTotal);
             }
 
         }
@@ -1839,7 +1854,7 @@ public class WiFiGPSLocationService
                 mWifi.startScan();
                 mWaitingForScan = true;
 
-                Log.i(TAG, "Starting WiFi scan.");
+                Log.v(TAG, "Starting WiFi scan.");
                 mTotal += 1.0;
                 mCurTotal += 1.0;
                 return true;
@@ -1847,7 +1862,7 @@ public class WiFiGPSLocationService
 
             if ( !Double.isNaN(mLimit) && (mCurTotal >= mLimit) )
             {
-                Log.i(TAG, "No budget to scan WiFi.");
+                Log.v(TAG, "No budget to scan WiFi.");
                 return false;
             }
             

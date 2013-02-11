@@ -145,7 +145,7 @@ public class DbAdaptor
     {
 
         int dbCount = mDb.delete(DATABASE_TABLE, "1", null);
-        Log.i(TAG, "Deleted database content: " + dbCount + " rows.");
+        Log.v(TAG, "Deleted database content: " + dbCount + " rows.");
 
         GPSInfo gpsInfo;
         double lat, lon, acc, loctime;
@@ -196,7 +196,7 @@ public class DbAdaptor
 
             mDb.insert(DATABASE_TABLE, null, initialValues);
 
-            Log.i(TAG, "Saved " + gpsInfo.toString());
+            Log.v(TAG, "Saved " + gpsInfo.toString());
         }
 
 

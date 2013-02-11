@@ -3,7 +3,8 @@ package org.ohmage.wifigpslocation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
+import org.ohmage.logprobe.Log;
 
 
 
@@ -23,7 +24,7 @@ public class ServiceStarter extends BroadcastReceiver
 
         context.startService(new Intent(context, 
         		WiFiGPSLocationService.class));
-        Log.i(TAG, "Started WiFiGPSLocationService");
+        Log.v(TAG, "Started WiFiGPSLocationService");
 
     }
 
