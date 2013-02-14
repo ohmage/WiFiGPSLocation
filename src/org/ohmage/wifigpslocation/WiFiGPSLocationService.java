@@ -422,6 +422,8 @@ public class WiFiGPSLocationService
                 {
                     Log.e(TAG, "Could not write to JSONObject", je);
                 }
+            } else {
+                Log.w(TAG, "No wifi scan results");
             }
 
             return scanResult.toString();
@@ -974,7 +976,7 @@ public class WiFiGPSLocationService
                         }
                         else
                         {
-                            Log.v(TAG, "Using fake location.");
+                            Log.w(TAG, "Using fake location.");
                             mLastKnownLoc = mFakeLocation;
                         }
                     }
