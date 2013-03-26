@@ -6,6 +6,8 @@
 package org.ohmage.wifigpslocation;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -30,6 +32,7 @@ import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.Settings;
 
 import edu.ucla.cens.systemsens.IAdaptiveApplication;
 import edu.ucla.cens.systemsens.IPowerMonitor;
@@ -155,6 +158,8 @@ public class WiFiGPSLocationService
         "WiFiGPSLocation:Approx";
     private static final String NET_PROVIDER =
         "WiFiGPSLocation:Network";
+
+    private static final int NOTIFICATION_WIFI_IS_OFF_ID = 0;
 
 
 
@@ -527,6 +532,8 @@ public class WiFiGPSLocationService
 
             if ((clientCount == 0) && (mRun))
             {
+                mNotifier.cancel(NOTIFICATION_WIFI_IS_OFF_ID);
+
                 Log.v(TAG, "Stoping operations");
                 // Cancel pending alarms
                 mAlarmManager.cancel(mScanSender);
@@ -561,6 +568,9 @@ public class WiFiGPSLocationService
                 return;
 
             Log.v(TAG, "Received a start() call from " + callerName);
+
+            if(!mWifi.isWifiEnabled())
+                showWiFiDisabledNotification();
 
             if (!mClientsTable.containsKey(callerName))
                 mClientsTable.put(callerName, 
@@ -678,11 +688,12 @@ public class WiFiGPSLocationService
                         WifiManager.WIFI_STATE_CHANGED_ACTION)) 
             {
                 int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
-                if (wifiState == WifiManager.WIFI_STATE_DISABLED)
-                {
-                    Log.v(TAG, "User disabeled Wifi." +
-                        " Setting up WiFi again");
-                        setupWiFi();
+                if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
+                    if(!mClientsTable.isEmpty())
+                        showWiFiDisabledNotification();
+                } else {
+                    mNotifier.cancel(NOTIFICATION_WIFI_IS_OFF_ID);
+                    setupWiFi();
                 }
             }
 
@@ -800,7 +811,26 @@ public class WiFiGPSLocationService
 
         }
     }
-	
+
+    protected void showWiFiDisabledNotification() {
+        Log.v(TAG, "User disabeled Wifi. Showing notification");
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, new Intent(
+                Settings.ACTION_WIFI_SETTINGS), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification note = new Notification();
+
+        note.icon = R.drawable.ic_dialog_alert_holo_dark;
+        note.tickerText = getString(R.string.no_wifi_ticker_text);
+        note.defaults |= Notification.DEFAULT_ALL;
+        note.when = System.currentTimeMillis();
+        note.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONLY_ALERT_ONCE;
+        note.setLatestEventInfo(this, getString(R.string.no_wifi_title), getString(R.string.no_wifi_message),
+                pendingIntent);
+
+        mNotifier.notify(NOTIFICATION_WIFI_IS_OFF_ID, note);
+    }
+
     @Override
     public void onStatusChanged(String provider, 
             int status, Bundle extras) 
@@ -1193,8 +1223,7 @@ public class WiFiGPSLocationService
 
     };
 
-
-
+    private NotificationManager mNotifier;
 	
     @Override
     public IBinder onBind(Intent intent)
@@ -1341,6 +1370,7 @@ public class WiFiGPSLocationService
         mCpuLock.setReferenceCounted(false);
 
 
+        mNotifier = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         mLocManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -1533,8 +1563,8 @@ public class WiFiGPSLocationService
     {
         // Check if WiFi is enabled
         if (!mWifi.isWifiEnabled())
-            mWifi.setWifiEnabled(true);
-        
+            return;
+
         if (mWifiLock == null)
         {
             mWifiLock = mWifi.createWifiLock(

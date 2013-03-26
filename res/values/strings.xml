@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">WiFiGPSLocation</string>
+    <string name="no_wifi_ticker_text">Ensure WiFi is on to guarantee accurate functioning of ohmage streams</string>
+    <string name="no_wifi_title">WiFi is Off</string>
+    <string name="no_wifi_message">WiFi should be turned on for accuracy</string>
+
 </resources>
