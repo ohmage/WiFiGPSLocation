@@ -421,7 +421,7 @@ public class WiFiGPSLocationService
                     scanResult.put("timezone",
                             DateTimeZone.getDefault().getID());
                             //TimeZone.getDefault().getID());
-
+                    return scanResult.toString();
                 }
                 catch (JSONException je)
                 {
@@ -431,8 +431,7 @@ public class WiFiGPSLocationService
                 Log.w(TAG, "No wifi scan results");
             }
 
-            return scanResult.toString();
-
+            return null;
         }
 
 
