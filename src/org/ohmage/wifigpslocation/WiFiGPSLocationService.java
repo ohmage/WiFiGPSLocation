@@ -33,6 +33,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 
 import edu.ucla.cens.systemsens.IAdaptiveApplication;
 import edu.ucla.cens.systemsens.IPowerMonitor;
@@ -41,9 +42,6 @@ import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.ohmage.logprobe.Log;
-import org.ohmage.logprobe.LogProbe;
-import org.ohmage.logprobe.LogProbe.Loglevel;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1246,11 +1244,6 @@ public class WiFiGPSLocationService
                     mPowerMonitorConnection, Context.BIND_AUTO_CREATE);
         }
 
-
-        LogProbe.setLevel(true, Loglevel.VERBOSE);
-        LogProbe.get(this);
-
-
         if (intent != null)
         {
             String action = intent.getAction();
@@ -1304,9 +1297,6 @@ public class WiFiGPSLocationService
     public void onCreate() 
     {
         super.onCreate();
-
-        LogProbe.setLevel(true, Loglevel.VERBOSE);
-        LogProbe.get(this);
 
         bindService(new Intent(IPowerMonitor.class.getName()),
                 mPowerMonitorConnection, Context.BIND_AUTO_CREATE);
@@ -1450,7 +1440,6 @@ public class WiFiGPSLocationService
 		
 		// Cancel WiFi scan registration
 		unregisterReceiver(mWifiScanReceiver);
-        LogProbe.close(this);
     }
 
     private boolean readDb()
