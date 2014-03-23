@@ -19,11 +19,3 @@ uses the WiFi RF fingerprint to detect when a user is not moving to
 turn off GPS, and when the user starts moving to turn it back on. This
 document outlines the design and implementation of WiFiGPSLocation,
 and provides instructions on how to use it in other applications.
-
-
-Dependencies
-============
-
-* [AccelService](https://github.com/ohmage/AccelService)
-* [LogProbe](https://github.com/cens/LogProbe)
-* [SystemSensLib](https://github.com/ohmage/SystemSensLib)
